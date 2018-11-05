@@ -36,6 +36,10 @@
 #define MAX_MENU_ITEMS 5
 #endif
 
+#ifndef SYS_SCREEN_DEFAULT_FONT_SIZE
+#define SYS_SCREEN_DEFAULT_FONT_SIZE 1
+#endif
+
 namespace gamelet
 {
   typedef enum { UP, DOWN, LEFT, RIGHT } direction_t;
@@ -46,6 +50,10 @@ namespace gamelet
     Menu () : cur_item_ (0), items_ (std::vector (MAX_MENU_ITEMS)){};
     ~Menu (){};
     void move (direction_t direction);
+    int current_item () const
+    {
+      return cur_item_;
+    };
     void select ();
 
   private:
@@ -67,21 +75,27 @@ namespace gamelet
   public:
     Screen ();
     ~Screen (){};
-    void font_config (int size = 1, const GFXfont *font = nullptr);
+    virtual void refresh () = 0;
   };
+
+  typedef enum { MENU, WIFI, DOWNLOAD } sys_scr_mode_t;
 
   class SystemScreen : public Screen
   {
   public:
-    SystemScreen () : Screen (), menu (SystemMenu ()){};
+    SystemScreen ();
     ~SystemScreen (){};
     void splash (int ms = 2000);
-    void show ();
+    void refresh () override;
+    void refresh_menu ();
+    void font_config (int size = SYS_SCREEN_DEFAULT_FONT_SIZE, const GFXfont *font = nullptr);
     SystemMenu menu;
 
   private:
+    int count_line_height ();
     void show_menu ();
     void show_keyboard ();
+    sys_scr_mode_t mode_;
   };
 }
 #endif // End of __HACK42_GAMELET_HH__
